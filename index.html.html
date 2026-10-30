@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة التمريض الأكاديمية التفاعلية | المطور حسن رياض</title>
+    <!-- خط القاهرة المتميز للقرّاء العرب -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <!-- مكتبة التنسيق المتميز Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- الأيقونات الطبية والتنظيمية FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- مكتبة الحركة والتأثيرات Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'sat-blue': '#0077CC',
+                        'sat-lblue': '#0EA5E9',
+                        'sat-navy': '#004A80',
+                        'sat-dark': '#0F172A',
+                        'sat-grey': '#F8FAFC',
+                        'sat-mint': '#10B981',
+                        'sat-red': '#EF4444'
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #F8FAFC;
+            overflow-x: hidden;
+        }
+        
+        /* تأثيرات نبض وموجات تخطيط القلب الطبية */
+        .pulse-wave {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawWave 5s linear infinite;
+        }
+        @keyframes drawWave {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* حركات عائمة تفاعلية مريحة للعين */
+        .clinical-float {
+            animation: floatMedical 4s ease-in-out infinite alternate;
+        }
+        @keyframes floatMedical {
+            0% { transform: translateY(0px) scale(1); }
+            100% { transform: translateY(-12px) scale(1.03); }
+        }
+
+        /* توهج تفاعلي */
+        .infographic-glow:hover {
+            box-shadow: 0 0 25px rgba(14, 165, 233, 0.45);
+            transform: translateY(-5px);
+        }
+
+        /* حركة النبض الدائم للأيقونات التمريضية */
+        .heart-beat-active {
+            animation: beatActive 1.5s infinite alternate;
+        }
+        @keyframes beatActive {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body class="text-sat-dark antialiased">
+
+    <div id="root"></div>
+
+    <!-- جلب حزم التشغيل المباشر من React & Babel -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // قاعدة بيانات محدثة ومصححة وشاملة للمسارات الأكاديمية وهياكل الكورسات والوزاري لعام 2026
+        const INITIAL_CURRICULUM = {
+            1: {
+                title: "المرحلة الأولى",
+                icon: "fa-stethoscope",
+                illustration: "🩺",
+                desc: "تأسيس المهارات الطبية الأساسية، التشريح، والتقنيات التمريضية الأولية.",
+                course1: [
+                    { id: "s1_c1_1", title: "أساسيات التمريض (نظري)", type: "نظري", lectures: [{ name: "تاريخ التمريض ومفهومه العالمي", instructor: "د. أحمد الموسوي", docName: "lec1_intro.pdf" }] },
+                    { id: "s1_c1_2", title: "أساسيات التمريض (عملي)", type: "عملي", lectures: [{ name: "السيطرة على تلوث البيئة وغسيل الأيدي", instructor: "أ. زينب الكعبي", docName: "lab1_sterile.pdf" }] }
+                ],
+                course2: [
+                    { id: "s1_c2_1", title: "علم وظائف الأعضاء الفسيولوجي", type: "نظري", lectures: [{ name: "وظائف خلايا الدم الحمراء والبيضاء", instructor: "د. هادي القاسم", docName: "physiology_blood.pdf" }] }
+                ]
+            },
+            2: {
+                title: "المرحلة الثانية",
+                icon: "fa-notes-medical",
+                illustration: "🦠",
+                desc: "دراسة الباثولوجيا السريرية العميقة لتمريض البالغين وعلم الأحياء الدقيقة.",
+                course1: [
+                    { id: "s2_c1_1", title: "علم الأحياء المجهريه للممرضين (نظري)", type: "نظري", lectures: [{ name: "مقدمة وتصنيفات الميكروبات الطبية", instructor: "د. جعفر الصادق", docName: "micro1_intro.pdf" }] },
+                    { id: "s2_c1_2", title: "علم الأحياء المجهريه للممرضين (عملي)", type: "عملي", lectures: [{ name: "طريقة صبغ الأحياء بالمخبر", instructor: "م.م. سارة الجبوري", docName: "micro_lab1.pdf" }] },
+                    { id: "s2_c1_3", title: "تمريض بالغين (نظري)", type: "نظري", lectures: [{ name: "تمريض ورعاية مرضى السكري المزمن", instructor: "أ.د. حيدر العلي", docName: "adult_diabetes.pdf" }] },
+                    { id: "s2_c1_4", title: "تمريض بالغين (عملي)", type: "عملي", lectures: [{ name: "إجراء قراءة وتطبيق تخطيط القلب ECG", instructor: "م. علي الشمري", docName: "ecg_adult.pdf" }] },
+                    { id: "s2_c1_5", title: "التقييم الصحي (عملي ونظري)", type: "مشترك", lectures: [{ name: "الفحص السريري للصدر والجهاز التنفسي", instructor: "د. ريم الخالدي", docName: "health_assessment.pdf" }] },
+                    { id: "s2_c1_6", title: "علم الأدوية للممرضين", type: "نظري", lectures: [{ name: "حساب جرعات العقاقير الطبية", instructor: "د. سمير الحسن", docName: "pharma_dose.pdf" }] }
+                ],
+                course2: [
+                    { 
+                        id: "s2_c2_1", 
+                        title: "علم الأحياء المجهريه (وزاري)", 
+                        type: "نظري", 
+                        isMinisterial: true, 
+                        sources: [{ title: "مصحف الأحياء الدقيقة السريري العالمي", link: "#" }],
+                        lectures: [{ name: "المقاومة للمضادات الحيوية البكتيرية", instructor: "د. منتظر العبيدي", docName: "micro_ministerial_1.pdf" }] 
+                    },
+                    { 
+                        id: "s2_c2_2", 
+                        title: "تمريض البالغين (وزاري)", 
+                        type: "مشترك", 
+                        isMinisterial: true, 
+                        sources: [{ title: "مبادئ برونر وسودارث لتمريض البالغين", link: "#" }],
+                        lectures: [{ name: "القصور التمريضي لمرضى الحروق الشاملة", instructor: "أ.د. حسن الموسوي", docName: "adult_burns_ministerial.pdf" }] 
+                    }
+                ]
+            },
+            3: {
+                title: "المرحلة الثالثة",
+                icon: "fa-baby-carriage",
+                illustration: "👶",
+                desc: "تخصص تمريض الأطفال أو تمريض صحة الأم والوليد تبعاً للمسار التبادلي المعتمد.",
+                pathways: {
+                    pediatricsFirst: {
+                        label: "مسار (أطفال كورس أول / نسائية كورس ثاني وزاري)",
+                        course1: [
+                            { id: "s3_ped_n1", title: "تمريض الأطفال (عملي ونظري)", type: "مشترك", lectures: [{ name: "رعاية الأطفال المبتسرين وحديثي الولادة", instructor: "د. فاطمة الزهراء", docName: "ped_newborn.pdf" }] },
+                            { id: "s3_ped_dev", title: "النمو والنماء السلوكي", type: "نظري", lectures: [{ name: "مراحل نماء الطفولة والمراهقة", instructor: "أ. مروة طارق", docName: "growth_dev.pdf" }] }
+                        ],
+                        course2: [
+                            { 
+                                id: "s3_mat_n2", 
+                                title: "تمريض الأم والوليد (وزاري)", 
+                                type: "مشترك", 
+                                isMinisterial: true, 
+                                sources: [{ title: "كتاب ريكارد لتمريض صحة الأم والولادة", link: "#" }],
+                                lectures: [{ name: "رعاية وعلاج النزيف الشديد أثناء الحمل والولادة", instructor: "أ.د. منى الهاشمي", docName: "maternity_ministerial_bleeding.pdf" }] 
+                            }
+                        ]
+                    },
+                    maternalFirst: {
+                        label: "مسار (نسائية كورس أول / أطفال كورس ثاني وزاري)",
+                        course1: [
+                            { id: "s3_mat_n1", title: "تمريض الأم والوليد (عملي ونظري)", type: "مشترك", lectures: [{ name: "مراقبة وتتبع الحمل الطبيعي والولادة الميسرة", instructor: "أ.د. سحر الفهد", docName: "maternity_pregnancy.pdf" }] }
+                        ],
+                        course2: [
+                            { 
+                                id: "s3_ped_n2", 
+                                title: "تمريض الأطفال (وزاري)", 
+                                type: "مشترك", 
+                                isMinisterial: true, 
+                                sources: [{ title: "كتاب ونغ لتمريض صحة الأطفال", link: "#" }],
+                                lectures: [{ name: "تدابير ومعالجة الجفاف الشديد والوقاية منه", instructor: "د. قيس التميمي", docName: "pediatrics_dehydration_ministerial.pdf" }] 
+                            }
+                        ]
+                    }
+                }
+            },
+            4: {
+                title: "المرحلة الرابعة",
+                icon: "fa-shield-heart",
+                illustration: "🧠",
+                desc: "تخصص تمريض الصحة النفسية والعقلية أو الرعاية والتمريض المجتمعي المتقدم.",
+                pathways: {
+                    communityFirst: {
+                        label: "مسار (صحة مجتمع كورس أول / نفسية كورس ثاني وزاري)",
+                        course1: [
+                            { id: "s4_comm_n1", title: "تمريض صحة مجتمع (عملي ونظري)", type: "مشترك", lectures: [{ name: "المسح الميداني والحصانة الأسرية للمجتمعات", instructor: "د. رعد الياسين", docName: "comm_survey.pdf" }] }
+                        ],
+                        course2: [
+                            { 
+                                id: "s4_psy_n2", 
+                                title: "تمريض الصحة النفسية والعقلية (وزاري)", 
+                                type: "مشترك", 
+                                isMinisterial: true, 
+                                sources: [{ title: "مبادئ تمريض الصحة العقلية السريرية", link: "#" }],
+                                lectures: [{ name: "الاضطرابات الذهانية وعلاجها السلوكي الشامل", instructor: "د. سليم عبدالأمير", docName: "psychiatric_schizophrenia.pdf" }] 
+                            }
+                        ]
+                    },
+                    psychiatryFirst: {
+                        label: "مسار (نفسية كورس أول / صحة مجتمع كورس ثاني وزاري)",
+                        course1: [
+                            { id: "s4_psy_n1", title: "تمريض الصحة النفسية والعقلية", type: "مشترك", lectures: [{ name: "مهارات التواصل الفعال مع الحالات الذهانية", instructor: "أ. ماجد الفاضل", docName: "psych_comm.pdf" }] }
+                        ],
+                        course2: [
+                            { 
+                                id: "s4_comm_n2", 
+                                title: "تمريض صحة مجتمع (وزاري)", 
+                                type: "مشترك", 
+                                isMinisterial: true, 
+                                sources: [{ title: "كتاب ستانهوب لتمريض صحة المجتمعات السكانية", link: "#" }],
+                                lectures: [{ name: "برامج التحصين المتقدمة وصحة الأسرة الميدانية", instructor: "د. عدي الهاشمي", docName: "comm_immunization_ministerial.pdf" }] 
+                            }
+                        ]
+                    }
+                }
+            }
+        };
+
+        // أسئلة اليوم التفاعلية للطلبة لاختبار المعلومات
+        const SAMPLE_QUIZ = [
+            { question: "ما هو معدل ضربات القلب الطبيعي للشخص البالغ أثناء الراحة؟", options: ["60-100 نبضة/دقيقة", "120-150 نبضة/دقيقة", "40-50 نبضة/دقيقة"], correct: 0 },
+            { question: "أي من المضادات الحيوية التالية يجب مراقبة وظائف الكلى عند إعطائه بجرعات عالية؟", options: ["بنسلين", "جنتامايسين", "أموكسيسيلين"], correct: 1 }
+        ];
+
+        function App() {
+            const [curriculum, setCurriculum] = useState(() => {
+                const saved = localStorage.getItem("nursing_curriculum_v4");
+                return saved ? JSON.parse(saved) : INITIAL_CURRICULUM;
+            });
+            const [selectedStage, setSelectedStage] = useState(null);
+            const [s3Pathway, setS3Pathway] = useState("pediatricsFirst");
+            const [s4Pathway, setS4Pathway] = useState("communityFirst");
+            const [selectedCourse, setSelectedCourse] = useState("course1");
+            const [selectedSubject, setSelectedSubject] = useState(null);
+            const [completedLectures, setCompletedLectures] = useState(() => {
+                const saved = localStorage.getItem("completed_lectures_v4");
+                return saved ? JSON.parse(saved) : {};
+            });
+            
+            // إدارة الملازم والمحاضرات والمصادر الإضافية باللوحة المتقدمة
+            const [isAdminMode, setIsAdminMode] = useState(false);
+            const [newLectureName, setNewLectureName] = useState("");
+            const [newInstructor, setNewInstructor] = useState("");
+            const [newUploadedFileName, setNewUploadedFileName] = useState("");
+            const [newSourceTitle, setNewSourceTitle] = useState("");
+            const [newSourceLink, setNewSourceLink] = useState("");
+
+            // أفكار إضافية تفاعلية: سؤال اليوم السريري وحاسبة الجرعات الطبية السريعة
+            const [doseWeight, setDoseWeight] = useState("");
+            const [doseMgPerKg, setDoseMgPerKg] = useState("");
+            const [calculatedDose, setCalculatedDose] = useState(null);
+            const [quizIndex, setQuizIndex] = useState(0);
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [quizFeedback, setQuizFeedback] = useState("");
+
+            useEffect(() => {
+                localStorage.setItem("nursing_curriculum_v4", JSON.stringify(curriculum));
+            }, [curriculum]);
+
+            useEffect(() => {
+                localStorage.setItem("completed_lectures_v4", JSON.stringify(completedLectures));
+            }, [completedLectures]);
+
+            const getSubjectsForView = (stageId, courseName) => {
+                const stage = curriculum[stageId];
+                if (!stage) return [];
+                if (stageId === 3) return stage.pathways[s3Pathway][courseName] || [];
+                if (stageId === 4) return stage.pathways[s4Pathway][courseName] || [];
+                return stage[courseName] || [];
+            };
+
+            const handleLectureToggle = (subjectId, lecName) => {
+                const key = `${subjectId}_${lecName}`;
+                setCompletedLectures(prev => ({ ...prev, [key]: !prev[key] }));
+            };
+
+            const calculateProgress = (subject) => {
+                if (!subject || !subject.lectures.length) return 0;
+                const completedCount = subject.lectures.filter(lec => completedLectures[`${subject.id}_${lec.name}`]).length;
+                return Math.round((completedCount / subject.lectures.length) * 100);
+            };
+
+            const calculateCourseProgress = (stageId, courseName) => {
+                const subjects = getSubjectsForView(stageId, courseName);
+                if (!subjects.length) return 0;
+                const total = subjects.reduce((sum, s) => sum + s.lectures.length, 0);
+                const completed = subjects.reduce((sum, s) => {
+                    return sum + s.lectures.filter(lec => completedLectures[`${s.id}_${lec.name}`]).length;
+                }, 0);
+                return total ? Math.round((completed / total) * 100) : 0;
+            };
+
+            const handleFileUploadSimulation = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    setNewUploadedFileName(file.name);
+                }
+            };
+
+            const handleAddLecture = (e) => {
+                e.preventDefault();
+                if (!newLectureName || !selectedSubject) return;
+
+                const newLec = {
+                    name: newLectureName,
+                    instructor: newInstructor || "غير محدد",
+                    docName: newUploadedFileName || "lecture_file.pdf"
+                };
+
+                const updatedCurriculum = { ...curriculum };
+                const updateArray = (arr) => arr.map(s => s.id === selectedSubject.id ? { ...s, lectures: [...s.lectures, newLec] } : s);
+
+                if (selectedStage === 3) {
+                    updatedCurriculum[3].pathways[s3Pathway][selectedCourse] = updateArray(updatedCurriculum[3].pathways[s3Pathway][selectedCourse]);
+                } else if (selectedStage === 4) {
+                    updatedCurriculum[4].pathways[s4Pathway][selectedCourse] = updateArray(updatedCurriculum[4].pathways[s4Pathway][selectedCourse]);
+                } else {
+                    updatedCurriculum[selectedStage][selectedCourse] = updateArray(updatedCurriculum[selectedStage][selectedCourse]);
+                }
+
+                setCurriculum(updatedCurriculum);
+                setSelectedSubject(prev => ({ ...prev, lectures: [...prev.lectures, newLec] }));
+                setNewLectureName("");
+                setNewInstructor("");
+                setNewUploadedFileName("");
+                alert("تمت إضافة الملزمة الطبية للتدريسي بنجاح!");
+            };
+
+            const handleAddSource = (e) => {
+                e.preventDefault();
+                if (!newSourceTitle || !selectedSubject) return;
+
+                const newSrc = { title: newSourceTitle, link: newSourceLink || "#" };
+                const updatedCurriculum = { ...curriculum };
+                const updateArray = (arr) => arr.map(s => s.id === selectedSubject.id ? { ...s, sources: [...(s.sources || []), newSrc] } : s);
+
+                if (selectedStage === 3) {
+                    updatedCurriculum[3].pathways[s3Pathway][selectedCourse] = updateArray(updatedCurriculum[3].pathways[s3Pathway][selectedCourse]);
+                } else if (selectedStage === 4) {
+                    updatedCurriculum[4].pathways[s4Pathway][selectedCourse] = updateArray(updatedCurriculum[4].pathways[s4Pathway][selectedCourse]);
+                } else {
+                    updatedCurriculum[selectedStage][selectedCourse] = updateArray(updatedCurriculum[selectedStage][selectedCourse]);
+                }
+
+                setCurriculum(updatedCurriculum);
+                setSelectedSubject(prev => ({ ...prev, sources: [...(prev.sources || []), newSrc] }));
+                setNewSourceTitle("");
+                setNewSourceLink("");
+                alert("تمت إضافة المصدر الدراسي للمنهج الوزاري!");
+            };
+
+            // حاسبة الجرعات الطبية للأطفال
+            const handleCalculateDose = (e) => {
+                e.preventDefault();
+                if (doseWeight && doseMgPerKg) {
+                    setCalculatedDose(parseFloat(doseWeight) * parseFloat(doseMgPerKg));
+                }
+            };
+
+            // تقديم إجابة السؤال التفاعلي
+            const handleQuizSubmit = (optIndex) => {
+                setSelectedAnswer(optIndex);
+                if (optIndex === SAMPLE_QUIZ[quizIndex].correct) {
+                    setQuizFeedback("أحسنت! إجابة سريرية صحيحة 🩺");
+                } else {
+                    setQuizFeedback("إجابة خاطئة، يرجى مراجعة الملازم الطبية المخصصة 📚");
+                }
+            };
+
+            return (
+                <div className="flex flex-col min-h-screen bg-sat-grey">
+                    
+                    {/* هيدر المنصة التفاعلية والنبضات الديناميكية */}
+                    <header className="bg-gradient-to-r from-sat-navy via-sat-blue to-sat-lblue text-white shadow-2xl relative overflow-hidden">
+                        <svg className="absolute inset-0 w-full h-full opacity-15 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                            <path className="pulse-wave stroke-white" strokeWidth="2" fill="none" d="M0,80 L120,80 L140,40 L160,120 L180,60 L200,90 L220,80 L500,80 L520,30 L540,130 L560,80 L800,80 L820,50 L840,110 L860,80 L1200,80" />
+                        </svg>
+
+                        <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+                            <div className="flex items-center space-x-4 space-x-reverse cursor-pointer" onClick={() => { setSelectedStage(null); setSelectedSubject(null); }}>
+                                <div className="p-3 bg-white/10 rounded-3xl clinical-float border border-white/20">
+                                    <i className="fa-solid fa-heart-pulse text-4xl text-sat-mint"></i>
+                                </div>
+                                <div>
+                                    <h1 className="text-2xl font-black font-cairo tracking-wide">المنصة الأكاديمية التفاعلية للتمريض</h1>
+                                    <p className="text-xs text-gray-200 mt-1">المؤسس المشرف: <span className="font-extrabold text-white underline decoration-sat-mint">Hassan Riah Abdul Sattar</span></p>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button 
+                                    onClick={() => setIsAdminMode(!isAdminMode)}
+                                    className={`px-4 py-2 text-xs font-bold rounded-xl transition flex items-center gap-2 ${isAdminMode ? 'bg-amber-400 text-sat-dark shadow-lg' : 'bg-white/10 hover:bg-white/20'}`}>
+                                    <i className="fa-solid fa-file-medical"></i> {isAdminMode ? 'لوحة الملازم والمصادر نشطة' : 'تعديل وإضافة الملازم'}
+                                </button>
+                                {selectedStage && (
+                                    <button onClick={() => { setSelectedStage(null); setSelectedSubject(null); }} className="px-4 py-2 bg-white/25 rounded-xl text-xs font-bold hover:bg-white/35 transition">
+                                        <i className="fa-solid fa-chevron-left"></i> الرئيسية
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* البوابة التعليمية والإنفوجرافيك */}
+                    <main className="flex-grow max-w-7xl w-full mx-auto px-6 py-10">
+                        
+                        {!selectedStage ? (
+                            // إنفوجرافيك تفاعلي مذهل يوضح مسيرة التمريض مع صور ورموز توضيحية ديناميكية
+                            <div className="space-y-16 animate__animated animate__fadeIn">
+                                <div className="text-center max-w-2xl mx-auto space-y-4">
+                                    <span className="px-3 py-1 bg-sat-blue/10 text-sat-blue rounded-full text-xs font-black inline-block">رحلتك الأكاديمية بالتفصيل لعام 2026</span>
+                                    <h2 className="text-3xl font-black text-sat-navy">المحطات والمسارات التمريضية المتطورة</h2>
+                                    <p className="text-gray-500 text-sm">مستكشف تفاعلي لعرض الخطوات الأربع، اختر مرحلتك لاستعراض الكورسات، الملازم والمناهج الوزارية المتكاملة.</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                                    {[1, 2, 3, 4].map(num => (
+                                        <div 
+                                            key={num}
+                                            onClick={() => setSelectedStage(num)}
+                                            className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:border-sat-lblue transition-all duration-300 cursor-pointer text-right relative overflow-hidden group infographic-glow">
+                                            <div className="absolute top-0 right-0 left-0 h-2 bg-gradient-to-r from-sat-blue to-sat-lblue"></div>
+                                            
+                                            <div className="flex justify-between items-center mb-4">
+                                                <div className="text-4xl clinical-float">{curriculum[num].illustration}</div>
+                                                <span className="text-4xl font-black text-sat-grey group-hover:text-sat-lblue/20 transition-colors">0{num}</span>
+                                            </div>
+
+                                            <h3 className="font-extrabold text-lg text-sat-navy group-hover:text-sat-blue transition-colors mb-2">{curriculum[num].title}</h3>
+                                            <p className="text-xs text-gray-400 leading-relaxed mb-4">{curriculum[num].desc}</p>
+                                            
+                                            <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+                                                <span className="text-xs font-bold text-gray-500">مستوى الإنجاز</span>
+                                                <span className="text-xs font-black text-sat-blue">{calculateCourseProgress(num, "course1")}%</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* الأدوات الطبية والأفكار التفاعلية الإضافية المضافة */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    {/* حاسبة الجرعات التمريضية للأطفال */}
+                                    <div className="bg-white p-6 rounded-3xl border border-gray-100 space-y-4 shadow-sm">
+                                        <h3 className="font-extrabold text-sm text-sat-navy flex items-center gap-2">
+                                            <i className="fa-solid fa-calculator text-sat-lblue"></i>
+                                            حاسبة جرعات أدوية الأطفال السريرية (جرعة تقديرية)
+                                        </h3>
+                                        <form onSubmit={handleCalculateDose} className="space-y-3">
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <input 
+                                                    type="number" 
+                                                    placeholder="وزن الطفل (كغم)" 
+                                                    value={doseWeight} 
+                                                    onChange={e => setDoseWeight(e.target.value)}
+                                                    className="px-3 py-2 text-xs rounded-xl border border-gray-200 outline-none w-full"
+                                                />
+                                                <input 
+                                                    type="number" 
+                                                    placeholder="الجرعة المطلوبة (ملغم / كغم)" 
+                                                    value={doseMgPerKg} 
+                                                    onChange={e => setDoseMgPerKg(e.target.value)}
+                                                    className="px-3 py-2 text-xs rounded-xl border border-gray-200 outline-none w-full"
+                                                />
+                                            </div>
+                                            <button type="submit" className="w-full py-2 bg-sat-navy hover:bg-sat-blue text-white rounded-xl text-xs font-bold transition">
+                                                احسب الجرعة الطبية المطلوبة
+                                            </button>
+                                        </form>
+                                        {calculatedDose !== null && (
+                                            <div className="p-3 bg-sat-mint/10 border border-sat-mint text-sat-mint rounded-xl text-xs font-bold text-center">
+                                                الجرعة المطلوبة للطفل: {calculatedDose} ملغم
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* سؤال اليوم التفاعلي للطلبة */}
+                                    <div className="bg-white p-6 rounded-3xl border border-gray-100 space-y-4 shadow-sm flex flex-col justify-between">
+                                        <h3 className="font-extrabold text-sm text-sat-navy flex items-center gap-2">
+                                            <i className="fa-solid fa-brain text-sat-mint animate-pulse"></i>
+                                            اختبر معلوماتك السريرية (سؤال اليوم التفاعلي)
+                                        </h3>
+                                        <div className="space-y-3">
+                                            <p className="text-xs text-gray-700 font-bold">{SAMPLE_QUIZ[quizIndex].question}</p>
+                                            <div className="flex flex-col gap-2">
+                                                {SAMPLE_QUIZ[quizIndex].options.map((opt, i) => (
+                                                    <button 
+                                                        key={i} 
+                                                        onClick={() => handleQuizSubmit(i)}
+                                                        className={`text-right px-4 py-2 text-xs rounded-xl border transition ${selectedAnswer === i ? 'bg-sat-blue text-white' : 'bg-sat-grey hover:bg-gray-200 text-gray-700'}`}>
+                                                        {opt}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            {quizFeedback && (
+                                                <p className="text-xs font-bold text-sat-blue mt-2 text-center">{quizFeedback}</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="p-6 bg-white rounded-3xl border border-gray-100 flex flex-col md:flex-row gap-6 items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-4 bg-sat-lblue/10 rounded-2xl text-sat-lblue">
+                                            <i className="fa-solid fa-graduation-cap text-3xl"></i>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-sat-navy">هل تود تصفح المقررات للتحضير؟</h4>
+                                            <p className="text-xs text-gray-500">اختر المرحلة لبدء تدوين ومتابعة المناهج والملخصات مع زملائك.</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-xs font-bold text-gray-400">تحت إشراف مباشر من المطور والمؤسس: Hassan Riah</span>
+                                </div>
+                            </div>
+                        ) : (
+                            // عرض ومتابعة الكورسات لمرحلة معينة مع الصور التفاعلية الديناميكية المخصصة للأقسام
+                            <div className="space-y-8 animate__animated animate__fadeIn">
+                                
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                                    <div>
+                                        <span className="text-xs font-black text-sat-lblue tracking-wider block mb-1">المحطة الحالية لعام 2026</span>
+                                        <h2 className="text-2xl font-black text-sat-navy">{curriculum[selectedStage].title}</h2>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button onClick={() => { setSelectedCourse("course1"); setSelectedSubject(null); }} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${selectedCourse === 'course1' ? 'bg-sat-blue text-white shadow-md' : 'bg-sat-grey text-gray-600 hover:bg-gray-200'}`}>الكورس الأول</button>
+                                        <button onClick={() => { setSelectedCourse("course2"); setSelectedSubject(null); }} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${selectedCourse === 'course2' ? 'bg-sat-blue text-white shadow-md' : 'bg-sat-grey text-gray-600 hover:bg-gray-200'}`}>الكورس الثاني</button>
+                                    </div>
+                                </div>
+
+                                {/* إضافة صور وأشكال توضيحية وتفاعلية ديناميكية لكل مرحلة يختارها الطالب */}
+                                <div className="p-6 bg-white rounded-3xl border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+                                    <div className="space-y-2">
+                                        <h4 className="font-extrabold text-sm text-sat-navy flex items-center gap-2">
+                                            <span className="p-2 bg-sat-lblue/10 rounded-xl text-sat-lblue heart-beat-active"><i className="fa-solid fa-user-doctor"></i></span>
+                                            التوجيه الأكاديمي والسريري للمرحلة
+                                        </h4>
+                                        <p className="text-xs text-gray-500 max-w-xl">
+                                            تتطلب دراسة هذه المرحلة توازناً مستمراً بين المهارات النظرية في القاعات الدراسية والتطبيق العملي السريري داخل ردهات المستشفيات والمراكز التخصصية التابعة لوزارة الصحة.
+                                        </p>
+                                    </div>
+                                    
+                                    {/* رسم توضيحي ديناميكي يتغير تفاعلياً حسب المرحلة */}
+                                    <div className="flex gap-2 shrink-0">
+                                        <span className="text-5xl border border-gray-200 p-4 rounded-3xl clinical-float bg-sat-grey">
+                                            {selectedStage === 1 ? "🩺" : selectedStage === 2 ? "🩸" : selectedStage === 3 ? "🤰" : "🧠"}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    {/* قائمة المواد */}
+                                    <div className="space-y-4">
+                                        <h3 className="font-extrabold text-sm text-gray-500 uppercase tracking-wider"><i className="fa-solid fa-clipboard-list ml-2"></i>مقررات الكورس المحددة</h3>
+                                        <div className="space-y-3">
+                                            {getSubjectsForView(selectedStage, selectedCourse).map(sub => {
+                                                const subProg = calculateProgress(sub);
+                                                return (
+                                                    <div 
+                                                        key={sub.id}
+                                                        onClick={() => setSelectedSubject(sub)}
+                                                        className={`p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${selectedSubject?.id === sub.id ? 'bg-sat-navy text-white border-sat-navy shadow-md' : 'bg-white border-gray-100 hover:border-sat-lblue'}`}>
+                                                        <div className="flex justify-between items-start">
+                                                            <h4 className="font-extrabold text-xs">{sub.title}</h4>
+                                                            {sub.isMinisterial && (
+                                                                <span className="bg-red-500 text-white text-[9px] px-2 py-0.5 rounded font-black shrink-0">وزاري 🔥</span>
+                                                            )}
+                                                        </div>
+                                                        <div className="mt-3 flex justify-between items-center text-[10px] opacity-85">
+                                                            <span>النوع: {sub.type}</span>
+                                                            <span>إنجاز: {subProg}%</span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* عرض المحاضرات، الملازم، التدريسي والمصادر */}
+                                    <div className="md:col-span-2">
+                                        {selectedSubject ? (
+                                            <div className="bg-white rounded-3xl p-6 border border-gray-100 space-y-6 animate__animated animate__fadeIn">
+                                                <div className="flex justify-between items-start border-b pb-4">
+                                                    <div>
+                                                        <h3 className="font-extrabold text-lg text-sat-navy">{selectedSubject.title}</h3>
+                                                        <p className="text-xs text-gray-400 mt-1">المحاضرات المتاحة لطلبة التمريض وتتبعها الأكاديمي.</p>
+                                                    </div>
+                                                    {selectedSubject.isMinisterial && (
+                                                        <span className="bg-sat-blue/10 text-sat-blue text-xs font-bold px-3 py-1 rounded-full"><i className="fa-solid fa-bookmark ml-1"></i>منهج وزاري معتمد</span>
+                                                    )}
+                                                </div>
+
+                                                {/* عرض المصادر للمناهج الوزارية فقط */}
+                                                {selectedSubject.isMinisterial && (
+                                                    <div className="p-4 bg-sat-lblue/5 rounded-2xl space-y-3 border border-sat-lblue/20">
+                                                        <h4 className="font-extrabold text-xs text-sat-navy flex items-center gap-2">
+                                                            <i className="fa-solid fa-book-medical text-sat-lblue"></i>
+                                                            المصادر المرجعية المعتمدة للامتحان الوزاري لعام 2026:
+                                                        </h4>
+                                                        {selectedSubject.sources && selectedSubject.sources.length > 0 ? (
+                                                            <ul className="space-y-1">
+                                                                {selectedSubject.sources.map((src, i) => (
+                                                                    <li key={i} className="text-xs text-gray-600 flex justify-between items-center">
+                                                                        <span>• {src.title}</span>
+                                                                        <a href={src.link} className="text-sat-blue hover:underline">زيارة المصدر المعتمد</a>
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        ) : (
+                                                            <p className="text-xs text-gray-400">سوف يقوم المطور بإضافة المصادر الرسمية لاحقاً.</p>
+                                                        )}
+
+                                                        {/* إضافة مصدر باللوحة */}
+                                                        {isAdminMode && (
+                                                            <form onSubmit={handleAddSource} className="pt-2 border-t border-sat-lblue/10 flex gap-2">
+                                                                <input 
+                                                                    type="text" 
+                                                                    placeholder="اسم المصدر" 
+                                                                    value={newSourceTitle} 
+                                                                    onChange={e => setNewSourceTitle(e.target.value)}
+                                                                    className="flex-grow px-3 py-2 text-xs rounded-xl border border-gray-200 outline-none"
+                                                                />
+                                                                <input 
+                                                                    type="text" 
+                                                                    placeholder="رابط المصدر" 
+                                                                    value={newSourceLink} 
+                                                                    onChange={e => setNewSourceLink(e.target.value)}
+                                                                    className="flex-grow px-3 py-2 text-xs rounded-xl border border-gray-200 outline-none"
+                                                                />
+                                                                <button type="submit" className="bg-sat-blue text-white text-xs px-3 py-2 rounded-xl">حفظ</button>
+                                                            </form>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {/* قائمة الملازم والمحاضرات للتحميل والتتبع */}
+                                                <div className="space-y-3">
+                                                    {selectedSubject.lectures.map((lec, idx) => {
+                                                        const isDone = completedLectures[`${selectedSubject.id}_${lec.name}`];
+                                                        return (
+                                                            <div key={idx} className="p-4 bg-sat-grey rounded-2xl border border-gray-100 hover:border-sat-lblue transition flex items-center justify-between">
+                                                                <div className="flex items-center space-x-3 space-x-reverse">
+                                                                    <button 
+                                                                        onClick={() => handleLectureToggle(selectedSubject.id, lec.name)}
+                                                                        className={`w-6 h-6 rounded-full border flex items-center justify-center transition ${isDone ? 'bg-sat-mint border-sat-mint text-white' : 'bg-white border-gray-300'}`}>
+                                                                        {isDone && <i className="fa-solid fa-check text-[10px]"></i>}
+                                                                    </button>
+                                                                    <div>
+                                                                        <h5 className={`text-xs font-extrabold ${isDone ? 'line-through text-gray-400' : 'text-sat-navy'}`}>{lec.name}</h5>
+                                                                        <p className="text-[10px] text-gray-400 mt-0.5">اسم التدريسي: <span className="font-bold text-gray-500">{lec.instructor}</span></p>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-[10px] text-gray-500 font-bold bg-white px-2 py-1 rounded border">{lec.docName}</span>
+                                                                    <button className="text-[10px] bg-white border border-gray-200 hover:border-sat-lblue px-3 py-1.5 rounded-xl transition">تحميل الملزمة</button>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+
+                                                {/* لوحة تحرير لإضافة محاضرات وملازم وملفات */}
+                                                {isAdminMode && (
+                                                    <form onSubmit={handleAddLecture} className="bg-amber-500/5 p-4 rounded-2xl border border-amber-300 space-y-3 mt-6">
+                                                        <h4 className="font-extrabold text-xs text-amber-800"><i className="fa-solid fa-file-arrow-up ml-1"></i>رفع وإضافة ملزمة جديدة إلى المادة</h4>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                            <input 
+                                                                type="text" 
+                                                                placeholder="عنوان المحاضرة التمريضية" 
+                                                                value={newLectureName} 
+                                                                onChange={e => setNewLectureName(e.target.value)}
+                                                                className="px-3 py-2 text-xs rounded-xl border border-gray-200 focus:outline-none focus:border-sat-blue"
+                                                            />
+                                                            <input 
+                                                                type="text" 
+                                                                placeholder="اسم التدريسي المادة" 
+                                                                value={newInstructor} 
+                                                                onChange={e => setNewInstructor(e.target.value)}
+                                                                className="px-3 py-2 text-xs rounded-xl border border-gray-200 focus:outline-none focus:border-sat-blue"
+                                                            />
+                                                        </div>
+                                                        <div className="flex items-center justify-between gap-4">
+                                                            <input 
+                                                                type="file" 
+                                                                onChange={handleFileUploadSimulation}
+                                                                className="text-xs text-gray-500"
+                                                            />
+                                                            <button type="submit" className="bg-amber-500 text-white text-xs px-4 py-2 rounded-xl font-bold">حفظ الملازم والأستاذ</button>
+                                                        </div>
+                                                    </form>
+                                                )}
+
+                                            </div>
+                                        ) : (
+                                            <div className="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-gray-200 flex flex-col items-center justify-center space-y-4">
+                                                <div className="p-4 bg-sat-lblue/10 rounded-full text-sat-lblue clinical-float">
+                                                    <i className="fa-solid fa-notes-medical text-4xl"></i>
+                                                </div>
+                                                <h4 className="font-bold text-sat-navy">جاهز للبدء والمتابعة الأكاديمية؟</h4>
+                                                <p className="text-xs text-gray-400 max-w-sm">اختر مادة دراسية لمراجعة الملازم المحفوظة والتحضير للامتحانات.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                            </div>
+                        )}
+
+                    </main>
+
+                    {/* الفوتر الاحترافي لعام 2026 مع حقوق المطور حسن رياض بتميز */}
+                    <footer className="bg-sat-dark text-white py-12 border-t border-sat-navy relative mt-16">
+                        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-right">
+                            <div className="space-y-2">
+                                <h4 className="font-extrabold text-md flex items-center gap-2 justify-center md:justify-start">
+                                    <i className="fa-solid fa-heart-pulse text-sat-lblue"></i>
+                                    منصة التمريض المتكاملة
+                                </h4>
+                                <p className="text-[11px] text-gray-400 leading-relaxed">بوابة تعليمية ذكية مخصصة لطلاب وأكاديميي كليات التمريض لتتبع المناهج، وتحميل الملازم الرسمية، والمصادر الوزارية المعتمدة.</p>
+                            </div>
+                            <div className="flex flex-col justify-center items-center">
+                                <span className="text-xs text-gray-400">تطوير وتصميم وتأسيس:</span>
+                                <span className="font-black text-white text-sm mt-1 tracking-widest">Hassan Riah Abdul Sattar</span>
+                            </div>
+                            <div className="flex flex-col justify-center items-center md:items-end">
+                                <span className="text-xs text-gray-400">جميع الحقوق محفوظة © 2026</span>
+                                <span className="text-[9px] text-sat-lblue/80 font-black mt-1">تطبيق تفاعلي ذكي وآمن بالكامل</span>
+                            </div>
+                        </div>
+                    </footer>
+
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
